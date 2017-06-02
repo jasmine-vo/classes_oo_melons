@@ -24,7 +24,16 @@ class AbstractMelonOrder(object):
         """Calculate price, including tax."""
 
         base_price = 5
+
+        # adjusts base price if melon species is a christmas melon
+        if self.species == 'christmas melon':
+            base_price *= 1.5
+        
         total = (1 + self.tax) * self.qty * base_price
+
+        # adjusts shipping cost if international order and quantity is less than 10
+        if self.qty < 10 and self.country_code != 'USA':
+            total += 3
 
         return total
 
@@ -57,3 +66,22 @@ class InternationalMelonOrder(AbstractMelonOrder):
 
         self.order_type = "international"
         self.tax = 0.17
+
+class GovernmentMelonOrder(AbstractMelonOrder):
+    """A melon order from the US government. """
+
+    passed_inspection = False
+
+    def __init__(self, species, qty):
+        """Initialize melon order attributes."""
+        super(GovernmentMelonOrder, self).__init__(species, qty, 'USA')
+
+        self.order_type = 'domestic'
+        self.tax = 0
+
+    def mark_inspection(self, passed):
+        """Pass security inspection."""
+
+        if passed is True:
+            self.passed_inspection = passed
+            return self.passed_inspection
